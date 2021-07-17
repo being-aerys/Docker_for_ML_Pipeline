@@ -1,6 +1,6 @@
 # Created by Aashish Adhikari at 9:50 AM 7/17/2021
 
-from flask import Flask, request
+from flask import Flask, request, jsonify
 from flasgger import Swagger # a Flask extention to create flask API's using documentation --> provides API specs in the docstrings.
 
 import pickle
@@ -11,11 +11,12 @@ import pandas as pd
 with open("svm_model.pkl", "rb") as svm_model_pkl:
     svm_model = pickle.load(svm_model_pkl)
 
+
 '''Create a flask app'''
 ml_app = Flask(__name__)
 swagger = Swagger(ml_app)
 
-@ml_app.route("/predict_svm_sample", methods = ["GET"])
+@ml_app.route("/predict", methods = ["GET"])
 def predict_svm_sample():
     """Endpoint to predict the class of a specific sample using the loaded SVM. [0: Setosa, 1: Versicolor, 2: Virginica]
     ---
@@ -36,6 +37,9 @@ def predict_svm_sample():
           in: query
           type: number
           required: True
+    responses:
+      200:
+        description: Index of predicted class
     """
     sepal_length = request.args.get("sepal_length")
     sepal_width = request.args.get("sepal_width")
@@ -44,6 +48,11 @@ def predict_svm_sample():
     features = np.array([[sepal_length, sepal_width, petal_length, petal_width]])
     prediction = svm_model.predict(features)
     return str(prediction)
+
+    # prediction_dict = dict{}
+    # prediction_dict["solution"] = prediction
+    #return str(prediction_dict)
+    #return jsonify({"prediction": prediction})
 
 @ml_app.route("/predict_a_batch", methods = ["POST"])
 def predict_a_batch():
@@ -55,7 +64,7 @@ def predict_a_batch():
           type: file
           required: True
     """
-    samples = pd.read_csv(request.files.get("input_file"))
+    samples = pd.read_csv(request.files.get("input_file"), header = None)
     predictions = svm_model.predict(samples)
     return str(list(predictions))
 
