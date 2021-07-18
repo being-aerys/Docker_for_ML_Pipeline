@@ -1,6 +1,6 @@
 # Created by Aashish Adhikari at 9:50 AM 7/17/2021
 
-from flask import Flask, request, jsonify
+from flask import Flask, request
 from flasgger import Swagger # a Flask extention to create flask API's using documentation --> provides API specs in the docstrings.
 
 import pickle
